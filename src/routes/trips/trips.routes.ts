@@ -15,26 +15,26 @@ router.get('/', async (ctx) => {
   if (!result.success) {
     ctx.status = 422;
     ctx.body = {
-      msg: result.error,
+      message: result.error,
     };
     return;
   }
   const repo = new TripsRepo(mongoPlug);
-  const docs = await repo.find(result.data);
+  const paginatedDocs = await repo.find(result.data);
 
-  (ctx.status = HttpStatusCode.Ok),
-    (ctx.body = {
-      msg: docs,
-    });
+  ctx.status = HttpStatusCode.Ok;
+
+  ctx.body = paginatedDocs;
 });
 
 router.post('/', async (ctx) => {
   const result = TripCreate.safeParse(ctx.request.body);
   if (!result.success) {
-    (ctx.status = HttpStatusCode.UnprocessableEntity),
-      (ctx.body = {
-        msg: result.error,
-      });
+    ctx.status = HttpStatusCode.UnprocessableEntity;
+
+    ctx.body = {
+      message: result.error,
+    };
     return;
   }
   const { data: body } = result;
@@ -42,6 +42,7 @@ router.post('/', async (ctx) => {
   const openStreetMapRepo = new OpenStreetMapRepo();
   const createUseCase = new TripCreateCase(tripsRepo, openStreetMapRepo);
   const trip = await createUseCase.createByReadings(body.readings);
+
   ctx.status = HttpStatusCode.Ok;
   ctx.body = trip;
 });

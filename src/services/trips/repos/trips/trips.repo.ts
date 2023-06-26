@@ -4,6 +4,7 @@ import { TTrip, TTripDocument } from '../../trips.schemas';
 import { TTripFindParams } from '../../../../routes/trips/trips.schemas';
 import { removeEmptyProperties } from '../../../../helpers/object.helpers';
 import { CommonObject } from '../../../../types/object.types';
+import { Paginated } from '../../../../types/pagination.types';
 
 export class TripsRepo {
   constructor(private readonly connection: MongoPlug) {}
@@ -12,7 +13,7 @@ export class TripsRepo {
     return this.connection.getConnection().collection('trips');
   }
 
-  async find(params: TTripFindParams): Promise<TTripDocument[]> {
+  async find(params: TTripFindParams): Promise<Paginated<TTripDocument>> {
     const { limit, offset, start_gte, start_lte, distance_gte } = params;
     const start: Filter<TTripDocument['start']> = removeEmptyProperties({
       $gte: start_gte,
@@ -25,13 +26,19 @@ export class TripsRepo {
       filter.start = start;
     }
     const options: FindOptions<TTripDocument> = removeEmptyProperties({
-      limit: limit ?? 2,
+      limit: limit ?? 20,
       skip: offset,
     });
     const result = await this.getCollection()
       .find<TTrip>(filter as CommonObject, options)
       .toArray();
-    return result as TTripDocument[];
+    const total = await this.getCollection().countDocuments(filter, options);
+    return {
+      items: result as TTripDocument[],
+      pagination: {
+        total,
+      },
+    };
   }
 
   async create(trip: TTrip): Promise<TTripDocument> {
