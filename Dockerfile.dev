@@ -1,0 +1,14 @@
+FROM node:18.16.0-alpine
+
+# Add package file
+WORKDIR /app
+COPY package.json /app
+COPY package-lock.json /app
+
+# Install deps
+RUN npm install
+
+# Copy source
+COPY . .
+
+CMD ["npm", "run", "dev"]
