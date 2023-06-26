@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  trips-service:
+    image: trips-service
+    container_name: trips-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "3000:3000"
+    networks:
+      - trips
+
+  mongodb:
+    image: mongo:6.0.5
+    container_name: trips-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    networks:
+      - trips
+
+networks:
+  trips:
+    driver: bridge
