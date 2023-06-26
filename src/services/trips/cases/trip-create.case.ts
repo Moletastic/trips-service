@@ -15,7 +15,7 @@ export class TripCreateCase {
 
     const duration = endReading.time - startReading.time;
 
-    const distance = getDistance(startReading.location, endReading.location);
+    const distance = getDistance(startReading.location, endReading.location).toFixed(2);
 
     const overspeedCount = getOverspeedByReadings(sortedReadings);
 
